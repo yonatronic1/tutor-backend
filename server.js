@@ -3,9 +3,29 @@ import cors from "cors";
 import mongoose from "mongoose";
 
 const app = express();
-app.use(cors({ origin: "*"}));
+
+// ✅ CORS configuration
+const allowedOrigins = [
+  "http://localhost:5173",              // Vite dev server
+  "https://tutor-frontend.vercel.app"   // replace with your actual Vercel frontend URL
+];
+
+app.use(cors({
+  origin: function (origin, callback) {
+    if (!origin) return callback(null, true); // allow curl/postman
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    } else {
+      return callback(new Error("Not allowed by CORS"));
+    }
+  },
+  credentials: true
+}));
+
+// ✅ Middleware
 app.use(express.json());
 
+// ✅ Check required environment variables
 const requiredVars = ["MONGO_URI", "JWT_SECRET"];
 for (const v of requiredVars) {
   if (!process.env[v]) {
@@ -14,6 +34,7 @@ for (const v of requiredVars) {
   }
 }
 
+// ✅ Start function
 const start = async () => {
   try {
     await mongoose.connect(process.env.MONGO_URI, {
@@ -25,6 +46,7 @@ const start = async () => {
     process.exit(1);
   }
 
+  // ✅ Tutor schema/model
   const tutorSchema = new mongoose.Schema({
     name: { type: String, required: true },
     subject: { type: String, required: true },
@@ -33,6 +55,7 @@ const start = async () => {
 
   const Tutor = mongoose.models.Tutor || mongoose.model("Tutor", tutorSchema);
 
+  // ✅ Routes
   app.get("/health", (req, res) => {
     res.json({ status: "ok" });
   });
@@ -59,11 +82,13 @@ const start = async () => {
     }
   });
 
+  // ✅ Error handler
   app.use((err, req, res, next) => {
     console.error("Unhandled error:", err.message);
     res.status(500).json({ ok: false, error: "SERVER_ERROR" });
   });
 
+  // ✅ Start server
   const PORT = process.env.PORT || 5000;
   app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
