@@ -4,28 +4,15 @@ import mongoose from "mongoose";
 
 const app = express();
 
-// ✅ CORS configuration
-const allowedOrigins = [
-  "http://localhost:5173",              // Vite dev server
-  "https://tutor-frontend.vercel.app"   // replace with your actual Vercel frontend URL
-];
-
+// ✅ Allow frontend origins (local + Vercel)
 app.use(cors({
-  origin: function (origin, callback) {
-    if (!origin) return callback(null, true); // allow curl/postman
-    if (allowedOrigins.includes(origin)) {
-      return callback(null, true);
-    } else {
-      return callback(new Error("Not allowed by CORS"));
-    }
-  },
+  origin: ["http://localhost:5173", "https://tutor-frontend.vercel.app"],
   credentials: true
 }));
 
-// ✅ Middleware
 app.use(express.json());
 
-// ✅ Check required environment variables
+// ✅ Env check
 const requiredVars = ["MONGO_URI", "JWT_SECRET"];
 for (const v of requiredVars) {
   if (!process.env[v]) {
@@ -34,7 +21,7 @@ for (const v of requiredVars) {
   }
 }
 
-// ✅ Start function
+// ✅ MongoDB connect
 const start = async () => {
   try {
     await mongoose.connect(process.env.MONGO_URI, {
