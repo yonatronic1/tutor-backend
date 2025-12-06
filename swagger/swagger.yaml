@@ -1,0 +1,53 @@
+openapi: 3.0.0
+info:
+  title: Tutor API
+  version: 1.0.0
+paths:
+  /api/tutors/register:
+    post:
+      summary: Register a new tutor
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name: { type: string }
+                subject: { type: string }
+                bio: { type: string }
+                price: { type: number }
+                email: { type: string }
+                password: { type: string }
+      responses:
+        "201":
+          description: Tutor registered
+  /api/tutors/login:
+    post:
+      summary: Login a tutor
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email: { type: string }
+                password: { type: string }
+      responses:
+        "200":
+          description: Tutor logged in
+  /api/tutors:
+    get:
+      summary: Get all tutors
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: List of tutors
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
