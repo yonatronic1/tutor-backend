@@ -4,13 +4,18 @@ import mongoose from "mongoose";
 
 const app = express();
 
-// ✅ Allow frontend origins (local + Vercel)
+// ✅ Allow only your deployed frontend
 app.use(cors({
-  origin: ["http://localhost:5173", "https://tutor-frontend.vercel.app"],
+  origin: ["https://tutor-frontend.vercel.app"],
   credentials: true
 }));
 
 app.use(express.json());
+
+// ✅ Health check route
+app.get("/health", (req, res) => {
+  res.json({ status: "ok" });
+});
 
 // ✅ Env check
 const requiredVars = ["MONGO_URI", "JWT_SECRET"];
@@ -42,11 +47,7 @@ const start = async () => {
 
   const Tutor = mongoose.models.Tutor || mongoose.model("Tutor", tutorSchema);
 
-  // ✅ Routes
-  app.get("/health", (req, res) => {
-    res.json({ status: "ok" });
-  });
-
+  // ✅ Tutor routes
   app.get("/api/tutors", async (req, res, next) => {
     try {
       const tutors = await Tutor.find().lean();
